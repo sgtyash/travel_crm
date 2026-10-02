@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ quotation.enquiry.destination }} · {{ quotation.guest_name }}</title>
+  <style>
+    @page { size: A4; margin: 18mm 15mm 20mm; }
+    @page inner { margin: 18mm 15mm 20mm; @bottom-center { content: "Travel Proposal  ·  Page " counter(page) " of " counter(pages); color: #3D6B63; font-family: Arial, sans-serif; font-size: 8pt; } }
+    @page cover { margin: 0; @bottom-center { content: none; } }
+    @page fullbleed { margin: 0; @bottom-center { content: none; } }
+    :root { --teal: #3D6B63; --mustard: #D4932F; --cream: #F4F1EA; --ink: #171a19; }
+    * { box-sizing: border-box; }
+    body { background: #fff; color: var(--ink); font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; line-height: 1.45; }
+    h1, h2, h3, .wordmark, .display { font-family: Arial Black, Arial, sans-serif; font-weight: 800; letter-spacing: -.5pt; }
+    h2 { color: var(--teal); font-size: 20pt; margin: 0 0 5mm; }
+    h3 { font-size: 11pt; margin: 0; }
+    p { margin: 0 0 3mm; }
+    table { border-collapse: collapse; width: 100%; }
+    .cover { height: 297mm; page: cover; page-break-after: always; position: relative; }
+    .teal-block { background: var(--teal); position: absolute; }
+    .top-block { height: 72mm; left: 0; top: 0; width: 90mm; }
+    .bottom-block { bottom: 0; height: 47mm; right: 0; width: 70mm; }
+    .cover-header { left: 20mm; position: absolute; right: 20mm; top: 18mm; }
+    .wordmark { color: var(--teal); font-size: 31pt; line-height: 1; text-transform: uppercase; }
+    .tagline { color: var(--mustard); font-size: 10pt; font-weight: bold; letter-spacing: 2pt; margin-top: 3mm; text-transform: uppercase; }
+    .polaroid { background: #fff; border: 4mm solid #fff; box-shadow: 0 5mm 12mm rgba(0,0,0,.17); height: 170mm; left: 20mm; overflow: hidden; position: absolute; right: 20mm; top: 72mm; }
+    .cover-photo { height: 100%; object-fit: cover; width: 100%; }
+    .cover-fallback { background: var(--cream); height: 100%; }
+    .photo-copy { background: linear-gradient(transparent, rgba(0,0,0,.78)); bottom: 0; color: #fff; left: 0; padding: 28mm 12mm 10mm; position: absolute; right: 0; }
+    .photo-copy .small { font-size: 13pt; }
+    .photo-copy .large { font-size: 26pt; line-height: 1.05; }
+    .divider { margin-top: 5mm; }
+    .dot { background: var(--mustard); border-radius: 50%; display: inline-block; height: 4mm; vertical-align: middle; width: 4mm; }
+    .line { background: #fff; display: inline-block; height: 1px; margin-left: 3mm; vertical-align: middle; width: 43mm; }
+    .cover-logo { background: #fff; border-radius: 50%; bottom: 14mm; height: 25mm; left: 20mm; object-fit: contain; padding: 2mm; position: absolute; width: 25mm; }
+    .inner-page { page: inner; page-break-after: always; }
+    .page-content { min-height: 250mm; }
+    .welcome-page { background: var(--teal); color: #fff; margin: -18mm -15mm -20mm; min-height: 297mm; padding: 22mm 15mm; }
+    .welcome-table { border-collapse: separate; border-spacing: 7mm 0; margin: 0 -7mm; width: calc(100% + 14mm); }
+    .welcome-table td { vertical-align: top; width: 50%; }
+    .welcome-copy { color: var(--cream); font-family: Georgia, serif; font-size: 13pt; font-style: italic; line-height: 1.65; padding: 9mm 3mm; }
+    .welcome-copy .dear { font-family: Arial, sans-serif; font-size: 18pt; font-style: normal; font-weight: bold; margin-bottom: 6mm; }
+    .guest-card { background: #fff; border-radius: 5mm; color: var(--ink); padding: 8mm; }
+    .guest-card h2 { font-family: Georgia, serif; font-size: 19pt; text-decoration: underline; }
+    .detail { border-bottom: 1px solid #ddd; padding: 2.8mm 0; }
+    .detail:last-child { border: 0; }
+    .detail-label { font-size: 8pt; font-weight: bold; letter-spacing: .5pt; }
+    .highlight-panel { border: 1px solid rgba(255,255,255,.75); margin-top: 11mm; min-height: 70mm; padding: 7mm 7mm 7mm 25mm; position: relative; }
+    .vertical-label { bottom: 7mm; color: var(--mustard); font-size: 11pt; font-weight: bold; left: 6mm; letter-spacing: 1.2pt; position: absolute; text-transform: uppercase; transform: rotate(-90deg); transform-origin: left top; }
+    .highlight-line { border-bottom: 1px solid rgba(255,255,255,.28); padding: 3mm 0; }
+    .highlight-line strong { text-decoration: underline; }
+    .break-page, .closing-page { height: 297mm; page: fullbleed; page-break-after: always; position: relative; }
+    .closing-page { page-break-after: auto; }
+    .bleed-image { height: 100%; left: 0; object-fit: cover; position: absolute; top: 0; width: 100%; }
+    .bleed-fallback { background: var(--teal); height: 100%; position: absolute; width: 100%; }
+    .bleed-overlay { background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.68)); height: 100%; position: absolute; width: 100%; }
+    .location { color: #fff; font-size: 11pt; font-weight: bold; position: absolute; right: 16mm; text-shadow: 0 1px 2px #000; top: 14mm; }
+    .day-banner { background: var(--teal); color: #fff; margin-bottom: 8mm; padding: 5mm; text-align: center; }
+    .day-banner h2 { color: #fff; font-size: 18pt; margin: 0; text-transform: uppercase; }
+    .day-photos { margin: 0 0 8mm; text-align: center; }
+    .day-photo { border: 2px solid var(--mustard); border-radius: 50%; height: 43mm; margin: 0 3mm; object-fit: cover; width: 43mm; }
+    .timeline { border-left: 1px solid var(--teal); margin-left: 8mm; padding-left: 9mm; }
+    .timeline-row { margin: 0 0 6mm; min-height: 13mm; position: relative; }
+    .timeline-dot { background: var(--teal); border-radius: 50%; height: 4mm; left: -11mm; position: absolute; top: 1mm; width: 4mm; }
+    .timeline-label { color: var(--teal); font-weight: bold; }
+    .section-title { background: var(--teal); color: #fff; font-size: 16pt; margin: 0 0 2mm; padding: 4mm 5mm; text-transform: uppercase; }
+    .section-subtitle { color: var(--mustard); font-size: 10pt; font-style: italic; margin-bottom: 6mm; }
+    .tier-bar { background: var(--teal); color: #fff; font-weight: bold; padding: 3mm; text-transform: uppercase; }
+    .matrix th { background: var(--cream); border: 1px solid #cfc8bb; color: var(--ink); font-size: 8pt; padding: 3mm; text-align: center; text-transform: uppercase; }
+    .matrix td { border: 1px solid #cfc8bb; padding: 3mm; text-align: center; }
+    .matrix .row-label { background: #fff; font-size: 8pt; font-weight: bold; text-align: left; }
+    .matrix .mustard { background: var(--mustard); color: #fff; font-weight: bold; }
+    .cost-cell { background: var(--cream); font-weight: bold; }
+    .tax-note { display: block; font-size: 7pt; font-weight: normal; margin-top: 1mm; }
+    .special { background: var(--teal); border-radius: 4mm; color: #fff; margin-top: 8mm; padding: 5mm; }
+    .special h3 { color: var(--mustard); margin-bottom: 2mm; }
+    .special ul { margin: 0; padding-left: 5mm; }
+    .rate-table th { background: var(--teal); color: #fff; font-size: 7.5pt; padding: 2.5mm; }
+    .rate-table td { border: 1px solid #d5d5d0; padding: 2.5mm; }
+    .rate-table tr:nth-child(even) td { background: var(--cream); }
+    .note { font-family: Georgia, serif; font-size: 8.5pt; font-style: italic; margin-top: 4mm; }
+    .important-heading { color: var(--mustard); font-size: 22pt; text-align: center; text-transform: uppercase; }
+    .info-grid { border-collapse: separate; border-spacing: 4mm; margin: -4mm; width: calc(100% + 8mm); }
+    .info-grid td { background: var(--teal); border-radius: 3mm; color: #fff; padding: 0; vertical-align: top; width: 50%; }
+    .info-header { background: #2b544e; color: #fff; font-weight: bold; padding: 3mm 4mm; }
+    .info-body { min-height: 34mm; padding: 4mm; white-space: pre-line; }
+    .term-block { margin-bottom: 7mm; }
+    .term-header { background: var(--teal); color: #fff; font-size: 12pt; font-weight: bold; padding: 3.5mm 5mm; text-transform: uppercase; }
+    .term-list { background: var(--cream); margin: 0; padding: 4mm 8mm 4mm 10mm; }
+    .term-list li { margin-bottom: 2mm; }
+    .closing-copy { bottom: 20mm; color: #fff; left: 22mm; position: absolute; right: 22mm; text-align: center; }
+    .closing-copy p { font-size: 12pt; }
+    .signature { font-family: Georgia, serif; font-size: 13pt; font-style: italic; margin-top: 6mm; }
+    .connect { color: var(--mustard); font-size: 15pt; font-weight: bold; margin: 7mm 0 4mm; }
+    .contact-table td { border: 0; color: #fff; font-size: 9pt; padding: 2mm; text-align: center; width: 33.33%; }
+    .badges { bottom: 7mm; left: 25mm; position: absolute; right: 25mm; text-align: center; }
+    .badge-placeholder { border: 1px solid rgba(255,255,255,.7); border-radius: 50%; display: inline-block; height: 13mm; margin: 0 3mm; width: 13mm; }
+    .empty { color: #777; font-style: italic; }
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="teal-block top-block"></div><div class="teal-block bottom-block"></div>
+    <div class="cover-header"><div class="wordmark">{{ agency_settings.agency_name }}</div><div class="tagline">{{ agency_settings.tagline }}</div></div>
+    <div class="polaroid">
+      {% if quotation.cover_photo %}<img class="cover-photo" src="{{ quotation.cover_photo.image.url }}" alt="Travel destination">{% else %}<div class="cover-fallback"></div>{% endif %}
+      <div class="photo-copy"><div class="small">Travel with</div><div class="large display">{{ agency_settings.agency_name }}</div><div class="divider"><span class="dot"></span><span class="line"></span></div></div>
+    </div>
+    {% if agency_settings.logo %}<img class="cover-logo" src="{{ agency_settings.logo.url }}" alt="Agency logo">{% endif %}
+  </section>
+
+  <section class="inner-page">
+    <div class="welcome-page">
+      <table class="welcome-table"><tr>
+        <td><div class="welcome-copy"><div class="dear">Dear Guest,</div>{{ agency_settings.welcome_message|default:agency_settings.closing_message|linebreaksbr }}</div></td>
+        <td><div class="guest-card"><h2>Guest Details</h2>
+          <div class="detail"><span class="detail-label">GUEST NAME</span>{{ quotation.guest_name|default:"-" }}</div>
+          <div class="detail"><span class="detail-label">ARRIVAL</span>{% if quotation.arrival_date %}{{ quotation.arrival_date|date:"d M Y" }}{% else %}-{% endif %}</div>
+          <div class="detail"><span class="detail-label">DEPARTURE</span>{% if quotation.nights %}{{ quotation.nights }} Days{% else %}-{% endif %}</div>
+          <div class="detail"><span class="detail-label">ADULTS</span>{% if quotation.adults is not None %}{{ quotation.adults }}{% else %}-{% endif %}</div>
+          <div class="detail"><span class="detail-label">CHILDREN</span>{% if quotation.children is not None %}{{ quotation.children }}{% else %}-{% endif %}</div>
+          <div class="detail"><span class="detail-label">PERSON W/O MATTRESS</span>{% if quotation.persons_without_mattress is not None %}{{ quotation.persons_without_mattress }}{% else %}-{% endif %}</div>
+          <div class="detail"><span class="detail-label">PERSON WITH MATTRESS</span>{% if quotation.persons_with_mattress is not None %}{{ quotation.persons_with_mattress }}{% else %}-{% endif %}</div>
+          <div class="detail"><span class="detail-label">FLIGHT #</span>{{ quotation.flight_number|default:"-" }}</div>
+        </div></td>
+      </tr></table>
+      <div class="highlight-panel"><div class="vertical-label">Tour Highlights</div>{% for day in day_plans %}<div class="highlight-line"><strong>DAY {{ day.day_number }}:</strong> {{ day.day_title }}</div>{% empty %}<div class="highlight-line">-</div>{% endfor %}</div>
+    </div>
+  </section>
+
+  <section class="break-page">
+    {% if quotation.break_photo %}<img class="bleed-image" src="{{ quotation.break_photo.image.url }}" alt="{{ quotation.enquiry.destination }}">{% else %}<div class="bleed-fallback"></div>{% endif %}
+    <div class="bleed-overlay"></div><div class="location">⌖ {{ quotation.enquiry.destination }}</div>
+  </section>
+
+  {% for day in day_plans %}
+    <section class="inner-page">
+      <div class="page-content">
+        <div class="day-banner"><h2>DAY {{ day.day_number }}: {{ day.day_title|upper }}</h2></div>
+        {% if day.photos.all %}<div class="day-photos">{% for photo in day.photos.all|slice:":3" %}<img class="day-photo" src="{{ photo.image.url }}" alt="{{ day.day_title }}">{% endfor %}</div>{% endif %}
+        <div class="timeline">
+          <div class="timeline-row"><span class="timeline-dot"></span><span class="timeline-label">Morning:</span> {{ day.morning_text|default:"-"|linebreaksbr }}</div>
+          <div class="timeline-row"><span class="timeline-dot"></span><span class="timeline-label">Afternoon:</span> {{ day.afternoon_text|default:"-"|linebreaksbr }}</div>
+          <div class="timeline-row"><span class="timeline-dot"></span><span class="timeline-label">Evening:</span> {{ day.evening_text|default:"-"|linebreaksbr }}</div>
+        </div>
+      </div>
+    </section>
+  {% endfor %}
+
+  <section class="inner-page">
+    <div class="page-content">
+      <div class="section-title">Accommodation</div><div class="section-subtitle">with Breakfast</div>
+      <div class="tier-bar">{{ quotation.package_tier|default:"Package" }}</div>
+      <table class="matrix">
+        <thead><tr><th>Details</th>{% for stay in island_stays %}<th>{{ stay.island_name }}</th>{% empty %}<th>-</th>{% endfor %}<th>Package Cost</th></tr></thead>
+        <tbody>
+          <tr><td class="row-label">HOTEL NAME</td>{% for stay in island_stays %}<td class="mustard">{{ stay.hotel_name }}</td>{% empty %}<td>-</td>{% endfor %}<td class="cost-cell" rowspan="2">{{ package_cost }}/-<span class="tax-note">incl. of all taxes</span></td></tr>
+          <tr><td class="row-label">CATEGORY</td>{% for stay in island_stays %}<td>{{ stay.room_category }}</td>{% empty %}<td>-</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+      <div class="section-title" style="margin-top: 9mm;">Ferry</div>
+      <table class="matrix">
+        <thead><tr><th>Details</th>{% for ferry in ferry_legs %}<th>{{ ferry.from_island }} – {{ ferry.to_island }}</th>{% empty %}<th>-</th>{% endfor %}</tr></thead>
+        <tbody>
+          <tr><td class="row-label">FERRY NAME</td>{% for ferry in ferry_legs %}<td class="mustard">{{ ferry.ferry_operator }}</td>{% empty %}<td>-</td>{% endfor %}</tr>
+          <tr><td class="row-label">CLASS</td>{% for ferry in ferry_legs %}<td>{{ ferry.ferry_class }}</td>{% empty %}<td>-</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+      <div class="special"><h3>SPECIAL INCLUSIONS</h3><ul>{% for inclusion in special_inclusions %}<li>{{ inclusion }}</li>{% empty %}<li>-</li>{% endfor %}</ul></div>
+    </div>
+  </section>
+
+  <section class="inner-page">
+    <div class="page-content">
+      <div class="section-title">Activity Ratesheet</div>
+      <table class="rate-table">
+        <thead><tr><th>Sr.No</th><th>Activity Name</th><th>Rate per Person</th><th>Sr.No</th><th>Activity Name</th><th>Rate per Person</th></tr></thead>
+        <tbody>{% for pair in activity_rate_pairs %}<tr><td>{{ forloop.counter }}</td><td>{{ pair.left.name }}</td><td>{{ pair.left.price }}</td>{% if pair.right %}<td>{{ forloop.counter|add:forloop.counter }}</td><td>{{ pair.right.name }}</td><td>{{ pair.right.price }}</td>{% else %}<td></td><td></td><td></td>{% endif %}</tr>{% empty %}<tr><td colspan="6">-</td></tr>{% endfor %}</tbody>
+      </table>
+      <div class="section-title" style="margin-top: 10mm;">Experiences</div>
+      <table class="rate-table"><thead><tr><th>Sr.No</th><th>Name</th><th>Price</th></tr></thead><tbody>{% for experience in experiences %}<tr><td>{{ forloop.counter }}</td><td>{{ experience.name }}</td><td>{{ experience.price }}</td></tr>{% empty %}<tr><td colspan="3">-</td></tr>{% endfor %}</tbody></table>
+      <div class="note">*on extra chargeable basis. Prices may differ island to island.</div>
+    </div>
+  </section>
+
+  <section class="inner-page">
+    <div class="page-content">
+      <h2 class="important-heading">Important Information</h2>
+      <table class="info-grid"><tr>{% for information in important_info_boxes %}{% if forloop.counter0|divisibleby:2 and not forloop.first %}</tr><tr>{% endif %}<td><div class="info-header">● {{ information.title }}</div><div class="info-body">{{ information.content }}</div></td>{% endfor %}</tr></table>
+    </div>
+  </section>
+
+  <section class="inner-page">
+    <div class="page-content">
+      <div class="term-block"><div class="term-header">Inclusions</div><ul class="term-list">{% for item in inclusions %}<li>{{ item }}</li>{% empty %}<li>-</li>{% endfor %}</ul></div>
+      <div class="term-block"><div class="term-header">Exclusions</div><ul class="term-list">{% for item in exclusions %}<li>{{ item }}</li>{% empty %}<li>-</li>{% endfor %}</ul></div>
+      <div class="term-block"><div class="term-header">Payment Terms &amp; Conditions</div><ul class="term-list">{% for item in payment_terms %}<li>{{ item }}</li>{% empty %}<li>-</li>{% endfor %}</ul></div>
+    </div>
+  </section>
+
+  <section class="closing-page">
+    {% if agency_settings.closing_photo %}<img class="bleed-image" src="{{ agency_settings.closing_photo.image.url }}" alt="Travel landscape">{% else %}<div class="bleed-fallback"></div>{% endif %}
+    <div class="bleed-overlay"></div>
+    <div class="closing-copy"><p>{{ agency_settings.closing_message|linebreaksbr }}</p><div class="signature">~ {{ agency_settings.founder_signature }}</div><div class="connect">Feel free to connect</div>
+      <table class="contact-table"><tr><td><strong>Phone Number</strong><br>{{ agency_settings.contact_phone }}</td><td><strong>Email Us</strong><br>{{ agency_settings.contact_email }}</td><td><strong>Connect on WhatsApp</strong><br>{{ agency_settings.whatsapp_number }}</td></tr></table>
+    </div>
+    <div class="badges"><span class="badge-placeholder"></span><span class="badge-placeholder"></span><span class="badge-placeholder"></span></div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{% extends "core/base.html" %}
+
+{% block title %}TravelCRM | Premium Travel Planning{% endblock %}
+
+{% block content %}
+<div class="mb-5">
+  <span class="text-uppercase small fw-bold" style="color: var(--crm-teal); letter-spacing: .12em;">Travel operations</span>
+  <h1 class="display-6 fw-bold mt-2 mb-2">Plan beautiful journeys with confidence.</h1>
+  <p class="text-secondary mb-0">Start a guest profile, craft a quotation, or manage the visual assets behind each travel proposal.</p>
+</div>
+
+<div class="row g-4 mb-5">
+  <div class="col-md-6">
+    <div class="card stat-card p-4">
+      <div class="stat-number">{{ customer_count }}</div>
+      <div class="stat-label mt-2">Guests in your CRM</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card stat-card mustard p-4">
+      <div class="stat-number">{{ quotation_count }}</div>
+      <div class="stat-label mt-2">Travel quotations</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6 col-xl-4">
+    <a class="action-card" href="{% url 'customer_create' %}">
+      <article class="card crm-card p-4">
+        <div class="icon-wrap mb-4"><i class="bi bi-person-plus-fill"></i></div>
+        <h2 class="h4 fw-bold">New Guest</h2>
+        <p class="text-secondary mb-0">Create a traveller profile and capture contact details.</p>
+      </article>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a class="action-card" href="{% url 'customer_list' %}">
+      <article class="card crm-card p-4">
+        <div class="icon-wrap mb-4"><i class="bi bi-people-fill"></i></div>
+        <h2 class="h4 fw-bold">All Guests</h2>
+        <p class="text-secondary mb-0">Browse and update existing guest profiles.</p>
+      </article>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a class="action-card" href="{% url 'quotation_list' %}">
+      <article class="card crm-card p-4">
+        <div class="icon-wrap mb-4"><i class="bi bi-journal-richtext"></i></div>
+        <h2 class="h4 fw-bold">All Quotations</h2>
+        <p class="text-secondary mb-0">Open package plans, edit details, and download brochures.</p>
+      </article>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a class="action-card" href="/admin/core/agencysettings/">
+      <article class="card crm-card p-4">
+        <div class="icon-wrap mb-4"><i class="bi bi-buildings-fill"></i></div>
+        <h2 class="h4 fw-bold">Agency Settings</h2>
+        <p class="text-secondary mb-0">Set your logo, contact details, and brochure content.</p>
+      </article>
+    </a>
+  </div>
+  <div class="col-md-6 col-xl-4">
+    <a class="action-card" href="/admin/core/photolibrary/">
+      <article class="card crm-card p-4">
+        <div class="icon-wrap mb-4"><i class="bi bi-images"></i></div>
+        <h2 class="h4 fw-bold">Photo Library</h2>
+        <p class="text-secondary mb-0">Upload the visual assets used in day plans and brochures.</p>
+      </article>
+    </a>
+  </div>
+</div>
+{% endblock %}

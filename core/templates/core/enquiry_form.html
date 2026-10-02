@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if enquiry %}Edit Enquiry{% else %}Add Enquiry{% endif %} | TravelCRM{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h2 mb-1">{% if enquiry %}Edit Enquiry{% else %}Add Enquiry{% endif %}</h1>
+        <p class="text-secondary mb-0">Capture the requested travel plan.</p>
+      </div>
+      <a class="btn btn-outline-secondary" href="{% url 'enquiry_list' %}">Back to enquiries</a>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="row">
+            {% for field in form %}
+              <div class="col-md-6 mb-3 {% if field.name == 'destination' %}col-lg-12{% endif %}">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+          {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+          <button class="btn btn-crm" type="submit">Save Enquiry</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

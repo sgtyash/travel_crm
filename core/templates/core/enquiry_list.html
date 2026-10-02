@@ -1,0 +1,63 @@
+{% extends "core/base.html" %}
+
+{% block title %}Enquiries | TravelCRM{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <span class="text-uppercase small fw-bold" style="color: var(--crm-teal); letter-spacing: .1em;">Trip requests</span>
+    <h1 class="h2 fw-bold mb-1">Enquiries</h1>
+    <p class="text-secondary mb-0">Track requested trips and travel dates.</p>
+  </div>
+  <a class="btn btn-crm" href="{% url 'enquiry_create' %}"><i class="bi bi-plus-lg me-2"></i>Add Enquiry</a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form class="row g-3" method="get">
+      <div class="col-md-5">
+        <label class="form-label" for="search">Search</label>
+        <input class="form-control" id="search" name="search" value="{{ search_term }}" placeholder="Customer or destination">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label" for="customer">Customer</label>
+        <select class="form-select" id="customer" name="customer">
+          <option value="">All customers</option>
+          {% for customer in customers %}
+            <option value="{{ customer.pk }}" {% if selected_customer == customer.pk|stringformat:"s" %}selected{% endif %}>{{ customer.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-outline-secondary w-100" type="submit">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if enquiries %}
+  <div class="row g-4">
+    {% for enquiry in enquiries %}
+      <div class="col-md-6 col-xl-4">
+        <article class="card crm-card p-4">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="icon-wrap"><i class="bi bi-airplane-engines-fill"></i></div>
+            <span class="badge rounded-pill status-ready">{{ enquiry.travel_type }}</span>
+          </div>
+          <h2 class="h4 fw-bold mt-4 mb-1">{{ enquiry.destination }}</h2>
+          <p class="text-secondary mb-3"><i class="bi bi-person me-2"></i>{{ enquiry.customer.name }}</p>
+          <div class="small text-secondary mb-1"><i class="bi bi-calendar-range me-2"></i>{{ enquiry.start_date|date:"M j" }} – {{ enquiry.end_date|date:"M j, Y" }}</div>
+          <div class="small text-secondary mb-4"><i class="bi bi-people me-2"></i>{{ enquiry.adults }} adults · {{ enquiry.children }} children</div>
+          <a class="btn btn-outline-crm w-100" href="{% url 'enquiry_edit' enquiry.pk %}">Open Enquiry <i class="bi bi-arrow-right ms-1"></i></a>
+        </article>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card text-center p-5">
+    <i class="bi bi-airplane fs-1 mb-3" style="color: var(--crm-teal);"></i>
+    <p class="text-secondary mb-3">No enquiries match this filter.</p>
+    <div><a class="btn btn-crm" href="{% url 'enquiry_create' %}">Add an enquiry</a></div>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "core/base.html" %}
+
+{% block title %}Quotation for {{ quotation.enquiry.customer.name }} | TravelCRM{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h1 class="h2 mb-1">Quotation: {{ quotation.enquiry.destination }}</h1>
+    <p class="text-secondary mb-0">Build this trip and update its pricing.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-crm" href="{% url 'quotation_pdf' quotation.pk %}">Download PDF</a>
+    <a class="btn btn-outline-secondary" href="{% url 'quotation_list' %}">Back to quotations</a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="h5">Enquiry details</h2>
+    <div class="row text-secondary">
+      <div class="col-md-3"><span class="d-block small text-uppercase">Customer</span><strong class="text-dark">{{ quotation.enquiry.customer.name }}</strong></div>
+      <div class="col-md-3"><span class="d-block small text-uppercase">Destination</span><strong class="text-dark">{{ quotation.enquiry.destination }}</strong></div>
+      <div class="col-md-3"><span class="d-block small text-uppercase">Travel dates</span><strong class="text-dark">{{ quotation.enquiry.start_date|date:"M j, Y" }} – {{ quotation.enquiry.end_date|date:"M j, Y" }}</strong></div>
+      <div class="col-md-3"><span class="d-block small text-uppercase">Travellers</span><strong class="text-dark">{{ quotation.enquiry.adults }} adults, {{ quotation.enquiry.children }} children</strong></div>
+    </div>
+  </div>
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Itinerary Days</h2>
+          {{ itinerary_formset.management_form }}
+          {% for form in itinerary_formset %}
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="border rounded p-3 mb-3">
+              {% for error in form.non_field_errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              <div class="row g-3">
+                {% for field in form.visible_fields %}
+                  {% if field.name != "DELETE" %}
+                    <div class="col-md-4">
+                      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {{ field }}
+                      {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% if form.instance.pk %}<div class="form-check mt-3">{{ form.DELETE }} <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Remove this day</label></div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Hotels</h2>
+          {{ hotel_formset.management_form }}
+          {% for form in hotel_formset %}
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="border rounded p-3 mb-3">
+              {% for error in form.non_field_errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              <div class="row g-3">
+                {% for field in form.visible_fields %}
+                  {% if field.name != "DELETE" %}
+                    <div class="col-md-4">
+                      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {{ field }}
+                      {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% if form.instance.pk %}<div class="form-check mt-3">{{ form.DELETE }} <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Remove this hotel</label></div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Transport</h2>
+          {{ transport_formset.management_form }}
+          {% for form in transport_formset %}
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="border rounded p-3 mb-3">
+              {% for error in form.non_field_errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              <div class="row g-3">
+                {% for field in form.visible_fields %}
+                  {% if field.name != "DELETE" %}
+                    <div class="col-md-4">
+                      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {{ field }}
+                      {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% if form.instance.pk %}<div class="form-check mt-3">{{ form.DELETE }} <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Remove this transport item</label></div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Activities</h2>
+          {{ activity_formset.management_form }}
+          {% for form in activity_formset %}
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            <div class="border rounded p-3 mb-3">
+              {% for error in form.non_field_errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+              <div class="row g-3">
+                {% for field in form.visible_fields %}
+                  {% if field.name != "DELETE" %}
+                    <div class="col-md-4">
+                      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {{ field }}
+                      {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% if form.instance.pk %}<div class="form-check mt-3">{{ form.DELETE }} <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Remove this activity</label></div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card border-start border-4 border-success position-sticky" style="top: 1rem;">
+        <div class="card-body">
+          <h2 class="h5">Pricing Summary</h2>
+          <p class="small text-secondary">Final price is calculated automatically when you save.</p>
+          <dl class="row mb-4">
+            <dt class="col-7">Total cost</dt><dd class="col-5 text-end">{{ quotation.calculate_total_cost }}</dd>
+            <dt class="col-7">Markup</dt><dd class="col-5 text-end">{{ quotation.markup_amount }}</dd>
+            <dt class="col-7">Discount</dt><dd class="col-5 text-end">{{ quotation.discount_amount }}</dd>
+            <dt class="col-7 border-top pt-2">Final price</dt><dd class="col-5 border-top pt-2 text-end fw-bold fs-5">{{ quotation.final_price }}</dd>
+          </dl>
+          {% for field in quotation_form %}
+            <div class="mb-3">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+          {% for error in quotation_form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+          <button class="btn btn-crm w-100" type="submit">Save Quotation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

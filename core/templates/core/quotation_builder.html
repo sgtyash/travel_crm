@@ -1,0 +1,311 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if quotation %}Edit Quotation{% else %}New Quotation{% endif %} | TravelCRM{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <span class="text-uppercase small fw-bold" style="color: var(--crm-teal); letter-spacing: .1em;">Guided trip builder</span>
+    <h1 class="h2 fw-bold mb-1">{% if quotation %}Edit Quotation{% else %}Create Quotation{% endif %}</h1>
+    <p class="text-secondary mb-0">Complete each section to build a guest-ready island package.</p>
+  </div>
+  <div class="d-flex gap-2">
+    {% if quotation %}<a class="btn btn-outline-crm" href="{% url 'quotation_pdf' quotation.pk %}"><i class="bi bi-file-earmark-pdf me-1"></i>Download PDF</a>{% endif %}
+    <a class="btn btn-outline-secondary" href="{% url 'quotation_list' %}">Back to quotations</a>
+  </div>
+</div>
+
+<datalist id="island-options">
+  <option value="Port Blair">
+  <option value="Havelock Island">
+  <option value="Neil Island">
+</datalist>
+<datalist id="ferry-operator-options">
+  <option value="Makruzz">
+  <option value="Nautika">
+  <option value="Green Ocean 1">
+  <option value="Green Ocean 2">
+  <option value="Govt Ferry">
+</datalist>
+<datalist id="ferry-class-options">
+  <option value="Premium">
+  <option value="Luxury">
+</datalist>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <section class="card section-card mb-4" style="--section-accent: #087c70;" x-data="{
+    isNew: false,
+    search: '',
+    nights: {% if quotation_form.nights.value %}{{ quotation_form.nights.value }}{% else %}null{% endif %},
+    days: {% if quotation_form.days.value %}{{ quotation_form.days.value }}{% else %}null{% endif %},
+    init() {
+      if (this.nights !== null && this.nights !== '' && (this.days === null || this.days === '')) this.days = Number(this.nights) + 1;
+    },
+    syncDaysFromNights(value) {
+      const nights = Number.parseInt(value, 10);
+      this.nights = value === '' ? null : nights;
+      this.days = value === '' || !Number.isFinite(nights) ? null : nights + 1;
+    },
+    syncNightsFromDays(value) {
+      const days = Number.parseInt(value, 10);
+      this.days = value === '' ? null : days;
+      this.nights = value === '' || !Number.isFinite(days) ? null : days - 1;
+    },
+    filterCustomers() {
+      const query = this.search.toLowerCase();
+      Array.from(this.$refs.customerSelect.options).forEach((option, index) => {
+        option.hidden = index > 0 && !option.text.toLowerCase().includes(query);
+      });
+    }
+  }">
+    <div class="card-header py-4 px-4">
+      <i class="bi bi-person-vcard-fill fs-4 me-2" style="color: #087c70;"></i><strong class="fs-5">1. Guest Details</strong>
+    </div>
+    <div class="card-body p-4">
+      {% for error in quotation_form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-4" x-show="!isNew">
+          <label class="form-label" for="customer-search">Search existing customers</label>
+          <input class="form-control" id="customer-search" type="search" placeholder="Type to filter customers" x-model="search" @input="filterCustomers()">
+        </div>
+        <div class="col-md-6 col-lg-4" x-show="!isNew">
+          <label class="form-label" for="{{ quotation_form.customer.id_for_label }}">Customer</label>
+          {{ quotation_form.customer }}
+          {% for error in quotation_form.customer.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-6 col-lg-4 d-flex align-items-end" x-show="!isNew">
+          <button class="btn btn-outline-crm w-100" type="button" @click="isNew = true; $refs.customerSelect.value = ''; $refs.guestName.value = $refs.newCustomerName.value"><i class="bi bi-person-plus me-1"></i>New Customer</button>
+        </div>
+        <div class="col-md-6 col-lg-4" x-cloak x-show="isNew">
+          <label class="form-label" for="{{ quotation_form.new_customer_name.id_for_label }}">New customer name</label>
+          {{ quotation_form.new_customer_name }}
+          {% for error in quotation_form.new_customer_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-6 col-lg-4" x-cloak x-show="isNew">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-outline-secondary w-100" type="button" @click="isNew = false; $refs.newCustomerName.value = ''"><i class="bi bi-arrow-left me-1"></i>Select Existing</button>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <label class="form-label" for="{{ quotation_form.guest_name.id_for_label }}">Guest name</label>
+          {{ quotation_form.guest_name }}
+          {% for error in quotation_form.guest_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="form-label">Trip Duration</div>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label text-nowrap" for="{{ quotation_form.nights.id_for_label }}">Number of Nights</label>
+              {{ quotation_form.nights }}
+              {% for error in quotation_form.nights.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-6">
+              <label class="form-label text-nowrap" for="{{ quotation_form.days.id_for_label }}">Number of Days</label>
+              {{ quotation_form.days }}
+              {% for error in quotation_form.days.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+          <p class="small text-secondary mb-0 mt-2" x-text="nights !== null && nights !== '' && days !== null && days !== '' ? `${nights}N / ${days}D` : 'Enter days or nights'">{% if quotation_form.nights.value and quotation_form.days.value %}{{ quotation_form.nights.value }}N / {{ quotation_form.days.value }}D{% else %}Enter days or nights{% endif %}</p>
+        </div>
+        {% for field in quotation_form %}
+          {% if field.name != "customer" and field.name != "new_customer_name" and field.name != "guest_name" and field.name != "nights" and field.name != "days" %}
+            <div class="col-md-6 col-lg-4">
+              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-card mb-4" style="--section-accent: #d79544;">
+    <div class="card-header py-4 px-4 d-flex justify-content-between align-items-center">
+      <div><i class="bi bi-water fs-4 me-2" style="color: #d79544;"></i><strong class="fs-5">2. Island Stays</strong></div>
+      <button class="btn btn-outline-crm" type="button" data-add-form="islands"><i class="bi bi-plus-lg me-1"></i>Add Another Island</button>
+    </div>
+    <div class="card-body p-4">
+      {{ island_formset.management_form }}
+      {% for error in island_formset.non_form_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+      <div id="islands-forms">
+        {% for form in island_formset %}
+          <div class="repeat-row border rounded p-3 mb-3" data-form-row data-persisted="{% if form.instance.pk %}true{% else %}false{% endif %}">
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{{ form.DELETE.as_hidden }}
+            <div class="row g-3">
+              {% for field in form.visible_fields %}
+                {% if field.name != "DELETE" %}
+                  <div class="col-md">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <button class="btn btn-sm btn-outline-danger mt-3" type="button" data-remove-form>Remove</button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-card mb-4" style="--section-accent: #37738e;">
+    <div class="card-header py-4 px-4 d-flex justify-content-between align-items-center">
+      <div><i class="bi bi-tsunami fs-4 me-2" style="color: #37738e;"></i><strong class="fs-5">3. Ferry Legs</strong></div>
+      <button class="btn btn-outline-crm" type="button" data-add-form="ferries"><i class="bi bi-plus-lg me-1"></i>Add Another Ferry</button>
+    </div>
+    <div class="card-body p-4">
+      {{ ferry_formset.management_form }}
+      {% for error in ferry_formset.non_form_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+      <div id="ferries-forms">
+        {% for form in ferry_formset %}
+          <div class="repeat-row border rounded p-3 mb-3" data-form-row data-persisted="{% if form.instance.pk %}true{% else %}false{% endif %}">
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{{ form.DELETE.as_hidden }}
+            <div class="row g-3">
+              {% for field in form.visible_fields %}
+                {% if field.name != "DELETE" %}
+                  <div class="col-md">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <button class="btn btn-sm btn-outline-danger mt-3" type="button" data-remove-form>Remove</button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-card mb-4" style="--section-accent: #7c5a9c;">
+    <div class="card-header py-4 px-4 d-flex justify-content-between align-items-center">
+      <div><i class="bi bi-sun-fill fs-4 me-2" style="color: #7c5a9c;"></i><strong class="fs-5">4. Day-by-Day Plan</strong></div>
+      <button class="btn btn-outline-crm" type="button" data-add-form="days"><i class="bi bi-plus-lg me-1"></i>Add Another Day</button>
+    </div>
+    <div class="card-body p-4">
+      {{ day_formset.management_form }}
+      {% for error in day_formset.non_form_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+      <div id="days-forms">
+        {% for form in day_formset %}
+          <div class="day-block border rounded p-3 mb-3" data-form-row data-persisted="{% if form.instance.pk %}true{% else %}false{% endif %}">
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{{ form.DELETE.as_hidden }}
+            <div class="row g-3">
+              {% for field in form.visible_fields %}
+                {% if field.name != "DELETE" and field.name != "photos" %}
+                  <div class="{% if field.name == 'day_number' %}col-md-2{% elif field.name == 'day_title' %}col-md-10{% else %}col-md-4{% endif %}">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div class="mt-3">
+              <div class="form-label mb-2">Choose up to 3 photos</div>
+              {% if form.photo_options %}
+                <div class="d-flex flex-wrap gap-3">
+                  {% for option in form.photo_options %}
+                    <label class="border rounded p-1 bg-light">
+                      <input class="form-check-input ms-1 photo-picker" type="checkbox" name="{{ form.photos.html_name }}" value="{{ option.photo.pk }}" {% if option.selected %}checked{% endif %}>
+                      <img src="{{ option.photo.image.url }}" alt="Itinerary photo" width="92" height="64" style="object-fit: cover;">
+                    </label>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="small text-secondary mb-0">No PhotoLibrary images are available yet. Upload them in Django admin first.</p>
+              {% endif %}
+              {% for error in form.photos.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+            <button class="btn btn-sm btn-outline-danger mt-3" type="button" data-remove-form>Remove</button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="card section-card mb-4" style="--section-accent: #087c70;">
+    <div class="card-header py-4 px-4"><i class="bi bi-check2-circle fs-4 me-2" style="color: #087c70;"></i><strong class="fs-5">5. Review &amp; Save</strong></div>
+    <div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <p class="mb-0 text-secondary">Save the quotation, island stays, ferry legs, and day plan together.</p>
+      <button class="btn btn-crm btn-lg px-4" type="submit"><i class="bi bi-check2-circle me-2"></i>Save Quotation</button>
+    </div>
+  </section>
+</form>
+
+<template id="islands-empty-form">
+  <div class="repeat-row border rounded p-3 mb-3" data-form-row data-persisted="false">
+    {% with form=island_formset.empty_form %}
+      {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{{ form.DELETE.as_hidden }}
+      <div class="row g-3">{% for field in form.visible_fields %}{% if field.name != "DELETE" %}<div class="col-md"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endif %}{% endfor %}</div>
+    {% endwith %}
+    <button class="btn btn-sm btn-outline-danger mt-3" type="button" data-remove-form>Remove</button>
+  </div>
+</template>
+<template id="ferries-empty-form">
+  <div class="repeat-row border rounded p-3 mb-3" data-form-row data-persisted="false">
+    {% with form=ferry_formset.empty_form %}
+      {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{{ form.DELETE.as_hidden }}
+      <div class="row g-3">{% for field in form.visible_fields %}{% if field.name != "DELETE" %}<div class="col-md"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endif %}{% endfor %}</div>
+    {% endwith %}
+    <button class="btn btn-sm btn-outline-danger mt-3" type="button" data-remove-form>Remove</button>
+  </div>
+</template>
+<template id="days-empty-form">
+  <div class="day-block border rounded p-3 mb-3" data-form-row data-persisted="false">
+    {% with form=day_formset.empty_form %}
+      {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{{ form.DELETE.as_hidden }}
+      <div class="row g-3">{% for field in form.visible_fields %}{% if field.name != "DELETE" and field.name != "photos" %}<div class="{% if field.name == 'day_number' %}col-md-2{% elif field.name == 'day_title' %}col-md-10{% else %}col-md-4{% endif %}"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endif %}{% endfor %}</div>
+      <div class="mt-3"><div class="form-label mb-2">Choose up to 3 photos</div>{% if empty_day_photo_options %}<div class="d-flex flex-wrap gap-3">{% for option in empty_day_photo_options %}<label class="border rounded p-1 bg-light"><input class="form-check-input ms-1 photo-picker" type="checkbox" name="{{ form.photos.html_name }}" value="{{ option.photo.pk }}"><img src="{{ option.photo.image.url }}" alt="Itinerary photo" width="92" height="64" style="object-fit: cover;"></label>{% endfor %}</div>{% else %}<p class="small text-secondary mb-0">No PhotoLibrary images are available yet.</p>{% endif %}</div>
+    {% endwith %}
+    <button class="btn btn-sm btn-outline-danger mt-3" type="button" data-remove-form>Remove</button>
+  </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const formConfigs = {
+    islands: { container: "islands-forms", template: "islands-empty-form" },
+    ferries: { container: "ferries-forms", template: "ferries-empty-form" },
+    days: { container: "days-forms", template: "days-empty-form" },
+  };
+
+  document.addEventListener("click", (event) => {
+    const addButton = event.target.closest("[data-add-form]");
+    if (addButton) {
+      const prefix = addButton.dataset.addForm;
+      const config = formConfigs[prefix];
+      const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+      const nextIndex = totalForms.value;
+      const markup = document.getElementById(config.template).innerHTML.replaceAll("__prefix__", nextIndex);
+      document.getElementById(config.container).insertAdjacentHTML("beforeend", markup);
+      totalForms.value = Number(nextIndex) + 1;
+    }
+
+    const removeButton = event.target.closest("[data-remove-form]");
+    if (removeButton) {
+      const row = removeButton.closest("[data-form-row]");
+      const deleteInput = row.querySelector('input[name$="-DELETE"]');
+      if (row.dataset.persisted === "true" && deleteInput) {
+        deleteInput.checked = true;
+        row.classList.add("d-none");
+      } else {
+        row.remove();
+      }
+    }
+  });
+
+  document.addEventListener("change", (event) => {
+    if (!event.target.matches(".photo-picker") || !event.target.checked) return;
+    const chosenPhotos = event.target.closest(".day-block").querySelectorAll(".photo-picker:checked");
+    if (chosenPhotos.length > 3) {
+      event.target.checked = false;
+      window.alert("You can select a maximum of 3 photos for each day.");
+    }
+  });
+</script>
+{% endblock %}
